@@ -1,7 +1,6 @@
-import React from "react";
 import "../index.css";
 
-function PopupWithForm({ name, title, isOpen, children, onClose }) {
+function PopupWithForm({ name, title, buttonText, children, isOpen, onClose }) {
   return (
     <div>
       <div className={`popup popup_${name} ${isOpen ? "popup_opened" : ""}`}>
@@ -22,7 +21,7 @@ function PopupWithForm({ name, title, isOpen, children, onClose }) {
               className={`popup__form-button-save popup__form-button-save_${name}`}
               type="submit"
             >
-              Сохранить
+              {buttonText}
             </button>
           </form>
         </div>

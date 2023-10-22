@@ -1,28 +1,25 @@
-import React from "react";
+import {useEffect, useState} from 'react';
 import "../index.css";
 import api from "../utils/api";
 import Card from "./Card";
 
 function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) {
 
-  const [userName, setUserName] = React.useState();
-  const [userDescription, setUserDescription] = React.useState();
-  const [userAvatar, setUserAvatar] = React.useState();
-  const [cards, setCards] = React.useState([]);
+  const [userName, setUserName] = useState("");
+  const [userDescription, setUserDescription] = useState("");
+  const [userAvatar, setUserAvatar] = useState("");
+  const [cards, setCards] = useState([]);
 
-  api
-    .getUserData()
-    .then(({ name, about, avatar }) => {
-      setUserName(name);
-      setUserDescription(about);
-      setUserAvatar(avatar);
-    })
-    .catch((err) => console.log(`Ошибка получения данных. ${err}`));
-
-  api
-    .getInitialCards()
-    .then((cards) => setCards(cards))
-    .catch((err) => console.log(`Ошибка добавления карточки. ${err}`));
+    useEffect(() => {
+      Promise.all([api.getUserData(), api.getInitialCards()])
+        .then(([{ name, about, avatar }, cards]) => {
+          setUserName(name);
+          setUserDescription(about);
+          setUserAvatar(avatar);
+          setCards(cards);
+        })
+        .catch((err) => console.log(`Ошибка получения данных. ${err}`));
+    }, []);
 
   return (
     <div>
@@ -59,6 +56,18 @@ function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) {
             <Card card={card} onCardClick={onCardClick} />
           ))}
         </section>
+
+
+        <section className="elements">
+        {cards.map((card) => (
+          <Card key={card._id} card={card} onCardClick={onCardClick} />
+        ))}
+      </section>
+
+
+
+
+
       </main>
     </div>
   );
