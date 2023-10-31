@@ -1,24 +1,36 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import "../index.css";
 import api from "../utils/api";
 import Card from "./Card";
+import { CurrentUserContext } from "../contexts/CurrentUserContext";
 
 function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) {
-  const [userName, setUserName] = useState("");
-  const [userDescription, setUserDescription] = useState("");
-  const [userAvatar, setUserAvatar] = useState("");
   const [cards, setCards] = useState([]);
+  const { name, about, avatar, _id } = useContext(CurrentUserContext);
+  const currentUser = useContext(CurrentUserContext);
 
   useEffect(() => {
-    Promise.all([api.getUserData(), api.getInitialCards()])
-      .then(([{ name, about, avatar }, cards]) => {
-        setUserName(name);
-        setUserDescription(about);
-        setUserAvatar(avatar);
-        setCards(cards);
-      })
-      .catch((err) => console.log(`Ошибка получения данных. ${err}`));
+    api
+      .getInitialCards()
+      .then((cards) => setCards(cards))
+      .catch((err) => console.log(`Ошибка добавления карточки. ${err}`));
   }, []);
+
+  function handleCardLike(card) {
+    const isLiked = card.likes.some((i) => i._id === currentUser._id);
+    api.changeLikeCardStatus(card._id, !isLiked).then((newCard) => {
+      setCards((state) => state.map((c) => (c._id === card._id ? newCard : c)));
+    });
+  }
+
+  function handleCardDelete(id) {
+    api
+      .deleteCard(id)
+      .then(() => {
+        setCards((state) => state.filter((c) => c._id !== id));
+      })
+      .catch((err) => console.log(`Ошибка при удалении карточки. ${err}`));
+  }
 
   return (
     <div>
@@ -29,11 +41,11 @@ function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) {
             type="button"
             onClick={onEditAvatar}
           >
-            <img className="profile__avatar" src={userAvatar} alt="Аватар" />
+            <img className="profile__avatar" src={avatar} alt="Аватар" />
           </button>
           <div className="profile__info">
             <div className="profile__top-bar">
-              <h1 className="profile__name">{userName}</h1>
+              <h1 className="profile__name">{name}</h1>
               <button
                 className="profile__edit-button"
                 type="button"
@@ -41,7 +53,7 @@ function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) {
                 onClick={onEditProfile}
               />
             </div>
-            <p className="profile__description">{userDescription}</p>
+            <p className="profile__description">{about}</p>
           </div>
           <button
             className="profile__add-button"
@@ -50,15 +62,16 @@ function Main({ onEditProfile, onAddPlace, onEditAvatar, onCardClick }) {
             onClick={onAddPlace}
           />
         </section>
-        <section className="elements">
-          {cards.map((card) => (
-            <Card card={card} onCardClick={onCardClick} />
-          ))}
-        </section>
 
         <section className="elements">
           {cards.map((card) => (
-            <Card key={card._id} card={card} onCardClick={onCardClick} />
+            <Card
+              key={card._id}
+              card={card}
+              onCardClick={onCardClick}
+              onCardLike={handleCardLike}
+              onCardDelete={handleCardDelete}
+            />
           ))}
         </section>
       </main>
