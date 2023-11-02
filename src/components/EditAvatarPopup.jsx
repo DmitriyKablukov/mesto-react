@@ -1,4 +1,4 @@
-import { createRef } from "react";
+import { createRef, useEffect } from "react";
 import PopupWithForm from "./PopupWithForm";
 
 function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
@@ -10,6 +10,10 @@ function EditAvatarPopup({ isOpen, onClose, onUpdateAvatar }) {
       avatar: avatar.current.value,
     });
   }
+
+  useEffect(() => {
+    avatar.current.value = "";
+  }, [isOpen]);
 
   return (
     <div>

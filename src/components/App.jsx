@@ -106,7 +106,6 @@ function App() {
   }
 
   return (
-    <>
       <CurrentUserContext.Provider value={currentUser}>
         <div className="page">
           <Header />
@@ -165,7 +164,6 @@ function App() {
           </div>
         </div>
       </CurrentUserContext.Provider>
-    </>
   );
 }
 
